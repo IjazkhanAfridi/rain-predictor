@@ -10,25 +10,11 @@
 
 **Tech Stack:** Django REST Framework • React.js • PostgreSQL • JWT • Open-Meteo API
 
-[Features](#-features) • [Installation](#setup-instructions) • [API Docs](#-api-endpoints) • [Demo](#-testing-the-application)
 
 </div>
 
 ---
 
-## Table of Contents
-
-- [Features](#-features)
-- [Project Structure](#-project-structure)
-- [Setup Instructions](#️-setup-instructions)
-- [API Endpoints](#-api-endpoints)
-- [Database Schema](#️-database-schema)
-- [Technologies Used](#-technologies-used)
-- [Testing](#-testing-the-application)
-- [Deployment](#-deployment-considerations)
-- [Repository](#-github-repository)
-
----
 
 ## Features
 
