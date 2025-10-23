@@ -1,0 +1,9 @@
+{
+    "database": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "db.sqlite3"
+    },
+    "secret_key": "django-insecure-test-key-8x2j9k4m5n6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h5",
+    "debug": true,
+    "allowed_hosts": ["localhost", "127.0.0.1", "*"]
+}
