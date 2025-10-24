@@ -1,0 +1,891 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Rain Prediction API",
+		"description": "Complete API collection for Rain Prediction Application with authentication and prediction endpoints.\n\n**Base URL:** http://localhost:8000/api\n\n**Default Credentials:**\n- Email: ijazafridi@gmail.com\n- Password: ijazafridi\n\n**Authentication:** JWT Bearer Token (automatically set after login)\n\n**Workflow:**\n1. Run 'User Signup' (if first time)\n2. Run 'User Login' to get JWT token\n3. Token is automatically saved and used in subsequent requests\n4. Use prediction endpoints with automatic authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "User Signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test response status",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Parse response",
+									"var jsonData = pm.response.json();",
+									"",
+									"// Test response structure",
+									"pm.test(\"Response has success flag\", function () {",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Response contains user data\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"    pm.expect(jsonData.data.user).to.have.property('id');",
+									"    pm.expect(jsonData.data.user).to.have.property('email');",
+									"});",
+									"",
+									"pm.test(\"Response contains JWT tokens\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('tokens');",
+									"    pm.expect(jsonData.data.tokens).to.have.property('access');",
+									"    pm.expect(jsonData.data.tokens).to.have.property('refresh');",
+									"});",
+									"",
+									"// Save tokens to environment variables",
+									"if (jsonData.data && jsonData.data.tokens) {",
+									"    pm.environment.set(\"access_token\", jsonData.data.tokens.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.tokens.refresh);",
+									"    pm.environment.set(\"user_id\", jsonData.data.user.id);",
+									"    pm.environment.set(\"user_email\", jsonData.data.user.email);",
+									"    ",
+									"    console.log(\"✅ Tokens saved successfully!\");",
+									"    console.log(\"Access Token: \" + jsonData.data.tokens.access.substring(0, 20) + \"...\");",
+									"}",
+									"",
+									"// Display success message",
+									"pm.test(\"✅ User registered successfully\", function () {",
+									"    pm.expect(jsonData.message).to.include(\"successfully\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ijazafridi@gmail.com\",\n    \"password\": \"ijazafridi\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/signup/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"signup",
+								""
+							]
+						},
+						"description": "Register a new user account.\n\n**Request Body:**\n- `email` (string, required): Valid email address\n- `password` (string, required): Minimum 8 characters\n\n**Response:**\n- User details\n- JWT access token (valid for 1 day)\n- JWT refresh token (valid for 7 days)\n\n**Note:** Tokens are automatically saved to environment variables for use in subsequent requests."
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test response status",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Parse response",
+									"var jsonData = pm.response.json();",
+									"",
+									"// Test response structure",
+									"pm.test(\"Login successful\", function () {",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message).to.include(\"Login successful\");",
+									"});",
+									"",
+									"pm.test(\"Response contains user data\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"    pm.expect(jsonData.data.user).to.have.property('id');",
+									"    pm.expect(jsonData.data.user).to.have.property('email');",
+									"});",
+									"",
+									"pm.test(\"Response contains JWT tokens\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('tokens');",
+									"    pm.expect(jsonData.data.tokens).to.have.property('access');",
+									"    pm.expect(jsonData.data.tokens).to.have.property('refresh');",
+									"});",
+									"",
+									"// Save tokens to environment variables",
+									"if (jsonData.data && jsonData.data.tokens) {",
+									"    pm.environment.set(\"access_token\", jsonData.data.tokens.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.tokens.refresh);",
+									"    pm.environment.set(\"user_id\", jsonData.data.user.id);",
+									"    pm.environment.set(\"user_email\", jsonData.data.user.email);",
+									"    ",
+									"    console.log(\"✅ Login successful! Tokens saved.\");",
+									"    console.log(\"User ID: \" + jsonData.data.user.id);",
+									"    console.log(\"Email: \" + jsonData.data.user.email);",
+									"    console.log(\"Access Token: \" + jsonData.data.tokens.access.substring(0, 20) + \"...\");",
+									"}",
+									"",
+									"// Response time check",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ijazafridi@gmail.com\",\n    \"password\": \"ijazafridi\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login",
+								""
+							]
+						},
+						"description": "Authenticate user and receive JWT tokens.\n\n**Request Body:**\n- `email` (string, required): Registered email address\n- `password` (string, required): User password\n\n**Response:**\n- User details\n- JWT access token (valid for 1 day)\n- JWT refresh token (valid for 7 days)\n\n**Important:** Run this request first to get authentication tokens for other endpoints!"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration and login.\n\n**Default Credentials:**\n- Email: ijazafridi@gmail.com\n- Password: ijazafridi\n\nBoth endpoints return JWT tokens that are automatically saved and used in subsequent requests."
+		},
+		{
+			"name": "Predictions",
+			"item": [
+				{
+					"name": "Make Prediction - London",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test response status",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Parse response",
+									"var jsonData = pm.response.json();",
+									"",
+									"// Test response structure",
+									"pm.test(\"Prediction successful\", function () {",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Response contains prediction data\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('location');",
+									"    pm.expect(jsonData.data).to.have.property('date');",
+									"    pm.expect(jsonData.data).to.have.property('prediction');",
+									"    pm.expect(jsonData.data).to.have.property('confidence');",
+									"});",
+									"",
+									"pm.test(\"Prediction is Rain or No Rain\", function () {",
+									"    pm.expect(['Rain', 'No Rain']).to.include(jsonData.data.prediction);",
+									"});",
+									"",
+									"pm.test(\"Confidence is between 0 and 1\", function () {",
+									"    pm.expect(jsonData.data.confidence).to.be.at.least(0);",
+									"    pm.expect(jsonData.data.confidence).to.be.at.most(1);",
+									"});",
+									"",
+									"pm.test(\"Weather data is present\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('weather_data');",
+									"    pm.expect(jsonData.data.weather_data).to.have.property('latitude');",
+									"    pm.expect(jsonData.data.weather_data).to.have.property('longitude');",
+									"});",
+									"",
+									"// Save prediction ID",
+									"if (jsonData.data && jsonData.data.id) {",
+									"    pm.environment.set(\"last_prediction_id\", jsonData.data.id);",
+									"}",
+									"",
+									"// Display result",
+									"console.log(\"🌍 Location: \" + jsonData.data.location);",
+									"console.log(\"📅 Date: \" + jsonData.data.date);",
+									"console.log(\"🌦️ Prediction: \" + jsonData.data.prediction);",
+									"console.log(\"📊 Confidence: \" + (jsonData.data.confidence * 100).toFixed(1) + \"%\");",
+									"",
+									"// Response time check",
+									"pm.test(\"Response time is acceptable\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"London\",\n    \"date\": \"2025-10-25\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Get rain prediction for London.\n\n**Authentication:** Required (Bearer Token)\n\n**Request Body:**\n- `location` (string, required): City name (e.g., \"London\")\n- `date` (string, required): Date in YYYY-MM-DD format\n\n**Response:**\n- Prediction result (Rain/No Rain)\n- Confidence score (0-1)\n- Weather data (precipitation, probability, coordinates)\n- Prediction ID for tracking"
+					},
+					"response": []
+				},
+				{
+					"name": "Make Prediction - New York",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Prediction successful for New York\", function () {",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.location).to.equal(\"New York\");",
+									"});",
+									"",
+									"console.log(\"🗽 New York Prediction: \" + jsonData.data.prediction);",
+									"console.log(\"📊 Confidence: \" + (jsonData.data.confidence * 100).toFixed(1) + \"%\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"New York\",\n    \"date\": \"2025-10-26\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Get rain prediction for New York City."
+					},
+					"response": []
+				},
+				{
+					"name": "Make Prediction - Tokyo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Prediction successful for Tokyo\", function () {",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.location).to.equal(\"Tokyo\");",
+									"});",
+									"",
+									"console.log(\"🗾 Tokyo Prediction: \" + jsonData.data.prediction);",
+									"console.log(\"📊 Confidence: \" + (jsonData.data.confidence * 100).toFixed(1) + \"%\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"Tokyo\",\n    \"date\": \"2025-10-27\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Get rain prediction for Tokyo, Japan."
+					},
+					"response": []
+				},
+				{
+					"name": "Make Prediction - Paris",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Prediction successful for Paris\", function () {",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.location).to.equal(\"Paris\");",
+									"});",
+									"",
+									"console.log(\"🗼 Paris Prediction: \" + jsonData.data.prediction);",
+									"console.log(\"📊 Confidence: \" + (jsonData.data.confidence * 100).toFixed(1) + \"%\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"Paris\",\n    \"date\": \"2025-10-28\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Get rain prediction for Paris, France."
+					},
+					"response": []
+				},
+				{
+					"name": "Make Prediction - Sydney",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Prediction successful for Sydney\", function () {",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.location).to.equal(\"Sydney\");",
+									"});",
+									"",
+									"console.log(\"🦘 Sydney Prediction: \" + jsonData.data.prediction);",
+									"console.log(\"📊 Confidence: \" + (jsonData.data.confidence * 100).toFixed(1) + \"%\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"Sydney\",\n    \"date\": \"2025-10-29\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Get rain prediction for Sydney, Australia."
+					},
+					"response": []
+				}
+			],
+			"description": "Rain prediction endpoints for various cities around the world.\n\n**All requests require authentication** (Bearer token automatically included).\n\nEach request includes automated tests to verify:\n- Response status\n- Prediction validity\n- Confidence score range\n- Weather data completeness"
+		},
+		{
+			"name": "History & Profile",
+			"item": [
+				{
+					"name": "Get Prediction History",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test response status",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Parse response",
+									"var jsonData = pm.response.json();",
+									"",
+									"// Test response structure",
+									"pm.test(\"History retrieved successfully\", function () {",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message).to.include(\"History retrieved\");",
+									"});",
+									"",
+									"pm.test(\"Response contains predictions array\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('count');",
+									"    pm.expect(jsonData.data).to.have.property('predictions');",
+									"    pm.expect(jsonData.data.predictions).to.be.an('array');",
+									"});",
+									"",
+									"// Display summary",
+									"console.log(\"📊 Total Predictions: \" + jsonData.data.count);",
+									"",
+									"if (jsonData.data.predictions.length > 0) {",
+									"    console.log(\"\\n📜 Recent Predictions:\");",
+									"    jsonData.data.predictions.slice(0, 5).forEach(function(pred, index) {",
+									"        console.log((index + 1) + \". \" + pred.location + \" (\" + pred.date + \"): \" + pred.prediction_result + \" - \" + (pred.confidence * 100).toFixed(1) + \"% confidence\");",
+									"    });",
+									"    ",
+									"    pm.test(\"Each prediction has required fields\", function () {",
+									"        var firstPred = jsonData.data.predictions[0];",
+									"        pm.expect(firstPred).to.have.property('id');",
+									"        pm.expect(firstPred).to.have.property('location');",
+									"        pm.expect(firstPred).to.have.property('date');",
+									"        pm.expect(firstPred).to.have.property('prediction_result');",
+									"        pm.expect(firstPred).to.have.property('confidence');",
+									"        pm.expect(firstPred).to.have.property('created_at');",
+									"    });",
+									"} else {",
+									"    console.log(\"No predictions found. Make some predictions first!\");",
+									"}",
+									"",
+									"// Response time check",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/history/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"history",
+								""
+							]
+						},
+						"description": "Retrieve all prediction history for the authenticated user.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- Total count of predictions\n- Array of all predictions with:\n  - Location and date\n  - Prediction result\n  - Confidence score\n  - Weather data\n  - Timestamps\n\n**Note:** Only shows predictions made by the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test response status",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Parse response",
+									"var jsonData = pm.response.json();",
+									"",
+									"// Test response structure",
+									"pm.test(\"Profile retrieved successfully\", function () {",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Response contains user data\", function () {",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"    pm.expect(jsonData.data.user).to.have.property('id');",
+									"    pm.expect(jsonData.data.user).to.have.property('email');",
+									"    pm.expect(jsonData.data.user).to.have.property('username');",
+									"    pm.expect(jsonData.data.user).to.have.property('date_joined');",
+									"});",
+									"",
+									"// Display profile info",
+									"console.log(\"👤 User Profile:\");",
+									"console.log(\"ID: \" + jsonData.data.user.id);",
+									"console.log(\"Email: \" + jsonData.data.user.email);",
+									"console.log(\"Username: \" + jsonData.data.user.username);",
+									"console.log(\"Member since: \" + new Date(jsonData.data.user.date_joined).toLocaleDateString());",
+									"",
+									"// Verify email matches environment",
+									"pm.test(\"Email matches logged in user\", function () {",
+									"    pm.expect(jsonData.data.user.email).to.equal(pm.environment.get(\"user_email\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/profile/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile",
+								""
+							]
+						},
+						"description": "Get profile information for the authenticated user.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- User ID\n- Email address\n- Username\n- Date joined"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for retrieving user's prediction history and profile information.\n\nBoth endpoints require authentication and only return data for the logged-in user."
+		},
+		{
+			"name": "Test Scenarios",
+			"item": [
+				{
+					"name": "Invalid Login - Wrong Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response indicates invalid credentials\", function () {",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.error).to.include(\"Invalid credentials\");",
+									"});",
+									"",
+									"console.log(\"✅ Invalid password correctly rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ijazafridi@gmail.com\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login",
+								""
+							]
+						},
+						"description": "Test error handling for invalid password.\n\nExpected: 401 Unauthorized with error message."
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized Access - No Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Request rejected without authentication\", function () {",
+									"    pm.expect(pm.response.json()).to.have.property('detail');",
+									"});",
+									"",
+									"console.log(\"✅ Unauthorized access correctly blocked\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"London\",\n    \"date\": \"2025-10-25\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Test that protected endpoints reject requests without authentication token.\n\nExpected: 401 Unauthorized"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Location",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error message indicates location not found\", function () {",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.error).to.include(\"Location not found\");",
+									"});",
+									"",
+									"console.log(\"✅ Invalid location correctly handled\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"location\": \"InvalidCityName12345\",\n    \"date\": \"2025-10-25\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/predict/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict",
+								""
+							]
+						},
+						"description": "Test error handling for invalid/non-existent location.\n\nExpected: 400 Bad Request with \"Location not found\" error."
+					},
+					"response": []
+				}
+			],
+			"description": "Test scenarios for error handling and edge cases.\n\nThese requests test:\n- Invalid credentials\n- Missing authentication\n- Invalid location names\n\nAll tests include automated validations."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		}
+	]
+}
